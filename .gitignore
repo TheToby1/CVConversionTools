@@ -1,0 +1,22 @@
+*.docx
+
+# For now ignore this, I'll add an example one and a readme
+*.md
+
+*.4tc
+*.aux
+*.bak
+*.gz
+*.log
+*.out
+*.pdf
+*.tex
+*.tmp
+*.xref
+*.fdb_latexmk
+*.fls
+
+*.html
+*.razor
+
+!cv_template.tex
