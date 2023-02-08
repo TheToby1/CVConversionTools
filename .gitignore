@@ -1,5 +1,4 @@
-*.docx
-
+# latex files
 *.4tc
 *.aux
 *.bak
@@ -13,5 +12,14 @@
 *.fdb_latexmk
 *.fls
 
+# razor files
 *.html
 *.razor
+
+# files created by runnning render
+/temp
+/output
+
+# python install files
+/dist
+*.egg-info
