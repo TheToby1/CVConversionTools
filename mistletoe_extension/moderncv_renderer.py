@@ -11,7 +11,7 @@ class ModernCVRenderer(LaTeXRenderer):
         super().__init__(CvEntry, PersonalInfo, BeginDocument, PageBreak)
         self.packages['babel'] = '[english]'
         self.packages['eurosym'] = []
-        self.packages['geometry'] = '[scale=.85, top=1.5cm]'
+        self.packages['geometry'] = '[scale=.85, top=1.5cm, bottom=1.5cm]'
         self.packages['lmodern'] = []
     
     def render_document(self, token):
