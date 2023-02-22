@@ -6,6 +6,7 @@ import argparse
 from mistletoe import Document
 from mistletoe_extension.blazor_renderer import MudBlazorCVRenderer
 from mistletoe_extension.moderncv_renderer import ModernCVRenderer
+from mistletoe_extension.json_renderer import JsonCVRenderer
 # Currently this renders the given file to all possible outputs, I should add a second arg for the output type.
 
 def onerror(func, path, exc_info):
@@ -58,6 +59,14 @@ def render_file(filePath, outFileName):
 
     with open(os.path.join('./output', outFileName + '.razor'), 'w') as fout:
         fout.write(rendered_html)
+
+    rendered_json = None
+    with open(filePath, 'r') as fin:
+        with JsonCVRenderer() as renderer:
+            rendered_json = renderer.render(Document(fin))
+
+    with open(os.path.join('./output', outFileName + '.json'), 'w') as fout:
+        fout.write(rendered_json)
 
 def get_file_and_render(input_file, git_dir='', output_file='output'):
     if git_dir != '':

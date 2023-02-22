@@ -1,5 +1,6 @@
 from mistletoe.latex_renderer import LaTeXRenderer
 from mistletoe.span_token import RawText
+from mistletoe.block_token import ListItem
 from mistletoe_extension.custom_span_tokens import PersonalInfo, PageBreak, BeginDocument
 from mistletoe_extension.custom_block_tokens import CvEntry
 
@@ -11,7 +12,7 @@ class ModernCVRenderer(LaTeXRenderer):
         super().__init__(CvEntry, PersonalInfo, BeginDocument, PageBreak)
         self.packages['babel'] = '[english]'
         self.packages['eurosym'] = []
-        self.packages['geometry'] = '[scale=.85, top=1.5cm, bottom=1.5cm]'
+        self.packages['geometry'] = '[left=.9cm, right=.9cm, top=.6cm, bottom=.6cm]'
         self.packages['lmodern'] = []
     
     def render_document(self, token):
@@ -55,45 +56,47 @@ class ModernCVRenderer(LaTeXRenderer):
     def render_begin_document(self, token):
         template = ('\\begin{document}\n'
                     '\\makecvtitle\n'
-                    '\\vspace*{-10mm}')
+                    '\\vspace*{-12mm}')
         return template
 
     def render_page_break(self, token):
         return '\\clearpage\n'
 
-    def render_paragraph(self, token):
-        if all(isinstance(item, RawText) for item in token.children):
-            return '\n\\cvitem{{}}{{{}}}\n'.format(self.render_inner(token))
-        return super().render_paragraph(token)
-
     def render_list(self, token):
         return self.render_inner(token)
 
     def render_list_item(self, token):
-        inner = ''
-        if all(isinstance(item, RawText) for item in token.children[0].children):
-            inner = ' '.join([self.render_raw_text(child) for child in token.children[0].children])
+        inner = self.render_inner(token).replace('\n', ' ')
         return '\\cvlistitem{{{}}}\n'.format(inner)
 
     def convert_pipe_to_bracket(string):
         return string.replace('|', '}{')
 
     def render_cv_entry(self, token):
-        # [cls.convert_pipe_to_bracket(line) + '}' + '{{}}' * (4 - line.count('|')) + '{']
-        
         lines = list(filter(None, self.render_inner(token).split('\n')))
-        if len(lines) != 2:
-            raise ValueError
         split_pipe = lines[0].split('|')
-        inner_first_section = '}{'.join([x.strip() for x in split_pipe])
-        # Should be missing brackets for a cventry if > 1 pipe symbol or missing for cvitem if <= 1
-        should_be_item = len(split_pipe) <= 2 and lines[1] == '<BLANK>'
-        missing_brackets = 2 - len(split_pipe) if should_be_item else 5 - len(split_pipe)
+        if len(lines) == 1 and len(split_pipe) <= 2:
+            inner = lines[0].replace(' | ', '}{')
+            template = '\\cvitem{{{}}}\n'
+            return template.format(inner)
+        elif ListItem in [type(y) for x in token.children for y in x.children]:
+            inner_first_section = '}{'.join([x.strip() for x in split_pipe])
+            missing_brackets = 6 - len(split_pipe)
 
-        first_section_template = '\\cvitem{{{}}}' if should_be_item else '\\cventry{{{}}}'
-        first_section = first_section_template.format(inner_first_section)
-        ending = '' if should_be_item else '{{{}}}'.format(lines[1].replace('<BLANK>', ''))
-        return first_section + '{}' * missing_brackets + ending + '\n'
+            first_section_template = '\\cventry{{{}}}'
+            first_section = first_section_template.format(inner_first_section)
+            cv_entry = first_section + '{}' * missing_brackets + '\n'
+
+            all_items = [x + '\n' if '\\cvlistitem' in x else '\\cvitem{{}}{{{}}}\n'.format(x) for x in lines[1:]]
+            return cv_entry + ''.join(all_items)
+        else:
+            inner_first_section = '}{'.join([x.strip() for x in split_pipe])
+            missing_brackets = 5 - len(split_pipe)
+
+            first_section_template = '\\cventry{{{}}}'
+            first_section = first_section_template.format(inner_first_section)
+            ending = '{{{}}}'.format('\n'.join(lines[1:]))
+            return first_section + '{}' * missing_brackets + ending + '\n'
 
     def render_table(self, token):
         def render_align(column_align):

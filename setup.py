@@ -7,5 +7,5 @@ setup(
     description='A set of mistletoe extensions for rendering a moderncv or blazor file from markdown.',
     author='Tobias Burns',
     license='MIT',
-    install_requires=['mistletoe']
+    install_requires=['mistletoe', 'json5']
 )

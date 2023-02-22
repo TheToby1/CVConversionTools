@@ -29,19 +29,16 @@ class CvEntry(BlockToken):
 
         # loop
         next_line = lines.peek()
-        if (next_line is not None
+        while (next_line is not None
+                and next_line.strip() != ''
                 and not Heading.start(next_line)
                 and not CodeFence.start(next_line)
-                and not ThematicBreak.start(next_line)
-                and not List.start(next_line)):
-
-            # probably a nicer way to avoid this being counted as a cvitem
-            stripped = '<BLANK>'
-            if next_line.strip() != '':
-                stripped = cls.convert_leading_tabs(next_line.lstrip())
+                and not ThematicBreak.start(next_line)):
+                
+            stripped = cls.convert_leading_tabs(next_line.lstrip())
             line_buffer.append(stripped)
             next(lines)
-        
+            next_line = lines.peek()
         # block level tokens are parsed here, so that footnotes
         # in quotes can be recognized before span-level tokenizing.
         Paragraph.parse_setext = False
