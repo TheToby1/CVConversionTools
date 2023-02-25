@@ -72,7 +72,6 @@ class JsonCVRenderer(HTMLRenderer):
         if BeginDocument in [type(x) for x in token.children]:
             return ''
         if not self.started:
-            print(token.children)
             template = ('"{}",\n'
                     '"ImagePath": "staticData/profile.jpg",\n'
                     '"SubSections": [\n')
@@ -83,14 +82,24 @@ class JsonCVRenderer(HTMLRenderer):
                     '"SubSections": [\n') if self.description_open and self.started else '{}'
         self.description_open = False
         return template.format(super().render_paragraph(token))
-
+    
     def render_list(self, token):
         template = ('"{}",\n'
                         '"ImagePath": null,\n'
                         '"SubSections": [') if self.description_open else '{}'
         self.description_open = False
-        
-        return '\n' + template.format(super().render_list(token).replace('\n', '')) + '\n'
+
+        list_template = '<{tag}{attr}>{inner}</{tag}>'
+        if token.start is not None:
+            tag = 'ol'
+            attr = ' start={}'.format(token.start) if token.start != 1 else ''
+        else:
+            tag = 'ul'
+            attr = ' style=list-style-type:disc'
+        self._suppress_ptag_stack.append(not token.loose)
+        inner = ''.join([self.render(child) for child in token.children])
+        self._suppress_ptag_stack.pop()
+        return '\n' + template.format(list_template.format(tag=tag, attr=attr, inner=inner)) + '\n'
 
     def render_cv_entry(self, token):
         template = ('null,\n'
@@ -112,4 +121,4 @@ class JsonCVRenderer(HTMLRenderer):
         title = lines[0] if should_be_simple else split_pipe[1]
         split_pipe.pop(1)
         subtitle = 'null' if should_be_simple else '"' + ' | '.join(split_pipe) + '"'
-        return template.format(title, subtitle, 'null' if should_be_simple else '"' + '\n'.join(lines[1:]) + '"')
+        return template.format(title, subtitle, 'null' if should_be_simple or len(lines) == 1 else '"' + '\n'.join(lines[1:]) + '"')
