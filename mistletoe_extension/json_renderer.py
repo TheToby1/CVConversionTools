@@ -44,7 +44,7 @@ class JsonCVRenderer(HTMLRenderer):
             split_title = inner.split('-')
             name = split_title[0].strip()
             self.description_open = True
-            return template.format(name, split_title[1].strip())
+            return template.format(name, " - ".join([x.strip() for x in split_title[1:]]))
         image_path = 'null' if self.started else '"staticData/profile.jpg"'
         template = ('null,\n'
                     '"ImagePath": ') + image_path + (',\n'
@@ -72,11 +72,14 @@ class JsonCVRenderer(HTMLRenderer):
         if BeginDocument in [type(x) for x in token.children]:
             return ''
         if not self.started:
+            render = super().render_paragraph(token)
             template = ('"{}",\n'
                     '"ImagePath": "staticData/profile.jpg",\n'
-                    '"SubSections": [\n')
+                    '"SubSections": [\n') if len(render.strip()) > 0 else ('null,\n'
+                                                                        '"ImagePath": "staticData/profile.jpg",\n'
+                                                                        '"SubSections": [\n')
             self.description_open = False
-            return template.format(super().render_paragraph(token))
+            return template.format(render)
         template = ('"{}",\n'
                     '"ImagePath": null,\n'
                     '"SubSections": [\n') if self.description_open and self.started else '{}'

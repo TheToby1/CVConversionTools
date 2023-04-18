@@ -12,7 +12,7 @@ class ModernCVRenderer(LaTeXRenderer):
         super().__init__(CvEntry, PersonalInfo, BeginDocument, PageBreak)
         self.packages['babel'] = '[english]'
         self.packages['eurosym'] = []
-        self.packages['geometry'] = '[left=.9cm, right=.9cm, top=.6cm, bottom=.6cm]'
+        self.packages['geometry'] = '[left=.85cm, right=.85cm, top=.55cm, bottom=.55cm]'
         self.packages['lmodern'] = []
     
     def render_document(self, token):
@@ -36,7 +36,7 @@ class ModernCVRenderer(LaTeXRenderer):
                     '\\title{{{}}}')
             split_title = inner.split('-')
             name = split_title[0].strip().split(' ')
-            return template.format(*name, split_title[1].strip())
+            return template.format(*name, " - ".join([x.strip() for x  in split_title[1:]]))
         elif token.level == 2:
             return '\n\\section{{{}}}\n'.format(inner)
         elif token.level == 3:
@@ -66,7 +66,7 @@ class ModernCVRenderer(LaTeXRenderer):
         return self.render_inner(token)
 
     def render_list_item(self, token):
-        inner = self.render_inner(token).replace('\n', ' ')
+        inner = self.render_inner(token).replace('\n', '')
         return '\\cvlistitem{{{}}}\n'.format(inner)
 
     def convert_pipe_to_bracket(string):
