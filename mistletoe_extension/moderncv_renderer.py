@@ -12,7 +12,7 @@ class ModernCVRenderer(LaTeXRenderer):
         super().__init__(CvEntry, PersonalInfo, BeginDocument, PageBreak)
         self.packages['babel'] = '[english]'
         self.packages['eurosym'] = []
-        self.packages['geometry'] = '[left=.85cm, right=.85cm, top=.55cm, bottom=.55cm]'
+        self.packages['geometry'] = '[left=1.27cm, right=1.27cm, top=1cm, bottom=1cm]'
         self.packages['lmodern'] = []
     
     def render_document(self, token):
@@ -22,7 +22,7 @@ class ModernCVRenderer(LaTeXRenderer):
                     '\\renewcommand{{\\listitemsymbol}}{{-~}}\n'
                     '\\nopagenumbers{{}}\n'
                     '{packages}'
-                    '\\setlength{{\\hintscolumnwidth}}{{3cm}}\n\n'
+                    '\\setlength{{\\hintscolumnwidth}}{{1.8cm}}\n\n'
                     '{inner}'
                     '\\end{{document}}\n')
         self.footnotes.update(token.footnotes)
@@ -56,7 +56,8 @@ class ModernCVRenderer(LaTeXRenderer):
     def render_begin_document(self, token):
         template = ('\\begin{document}\n'
                     '\\makecvtitle\n'
-                    '\\vspace*{-12mm}')
+                    '\\vspace*{-10mm}\n'
+                    '\\setlength{\parskip}{-0.05em}')
         return template
 
     def render_page_break(self, token):
