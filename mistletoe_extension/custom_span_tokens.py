@@ -8,12 +8,12 @@ class PersonalInfo(SpanToken):
         self.target = match_obj.group(2)
 
 class BeginDocument(SpanToken):
-    pattern = re.compile(r' {0,3}(?:([_])\s*?)(?:\1\s*?){2,}')
+    pattern = re.compile(r' {0,3}(?:([_])\s*?)(?:\1\s*?){3,}')
     def __init__(self, match_obj):
         self.target = match_obj.group(1)
 
 class PageBreak(SpanToken):
-    pattern = re.compile(r' {0,3}(?:([*])\s*?)(?:\1\s*?){2,}')
+    pattern = re.compile(r' {0,3}(?:([*])\s*?)(?:\1\s*?){3,}')
     precedence = 6
     def __init__(self, match_obj):
         pass
