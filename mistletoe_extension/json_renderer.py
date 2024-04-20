@@ -69,7 +69,7 @@ class JsonCVRenderer(HTMLRenderer):
         return self.render_inner(token)
 
     def render_paragraph(self, token):
-        if BeginDocument in [type(x) for x in token.children]:
+        if BeginDocument in [type(x) for x in token.children] or not super().render_paragraph(token).strip():
             return ''
         if not self.started:
             render = super().render_paragraph(token)
@@ -122,6 +122,7 @@ class JsonCVRenderer(HTMLRenderer):
                 '"SubSections": []\n'
                 '}},\n')
         title = lines[0] if should_be_simple else split_pipe[1]
-        split_pipe.pop(1)
+        if not should_be_simple: 
+            split_pipe.pop(1)
         subtitle = 'null' if should_be_simple else '"' + ' | '.join(split_pipe) + '"'
         return template.format(title, subtitle, 'null' if should_be_simple or len(lines) == 1 else '"' + '\n'.join(lines[1:]) + '"')

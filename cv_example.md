@@ -2,6 +2,8 @@
 
 ___
 
+You can put a description paragraph at the beginning.
+
 ## Education
 
 ### 2017 - 2019 | Study in pursuit of a PhD before exiting the program | Department of Computer Science, Maynooth University, Ireland | Deep Slam: Utilising Deep Learning for Predictive 3D Mapping, Supervisors: Dr. John McDonald & Prof. Barak Pearlmutter

@@ -17,9 +17,22 @@ The main missing piece is for personal info. This can be done as follows.
 `linkedin` [TobyBurns](https://www.linkedin.com/in/tobyburns/)
 ```
 
-## Usage
-Mistletoe install through conda-forge with the requirements.txt file.
+## Installation and Usage
+Mistletoe should install through conda-forge with the requirements.txt file:
 
 `conda config --append channels conda-forge`
 
 The v0.9.0 (at the time of writing) on pip should also work.
+
+It is recommended to set up a conda environment to run it in:
+
+`conda create --name cvtools --file requirements.txt`
+`conda activate cvtools`
+
+And then run with something like:
+
+`python render.py cv_example.md`
+
+There are a couple of extra arguments you can use. You can check these with:
+
+`python .\render.py --help`

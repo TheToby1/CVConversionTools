@@ -76,7 +76,10 @@ class ModernCVRenderer(LaTeXRenderer):
     def render_cv_entry(self, token):
         lines = list(filter(None, self.render_inner(token).split('\n')))
         split_pipe = lines[0].split('|')
-        if len(lines) == 1 and len(split_pipe) <= 2:
+        if len(lines) == 1 and len(split_pipe) == 1:
+            template = '\\cvitem{{}}{{{}}}\n'
+            return template.format(lines[0])
+        elif len(lines) == 1 and len(split_pipe) == 2:
             inner = lines[0].replace(' | ', '}{')
             template = '\\cvitem{{{}}}\n'
             return template.format(inner)
