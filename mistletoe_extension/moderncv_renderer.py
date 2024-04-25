@@ -12,8 +12,9 @@ class ModernCVRenderer(LaTeXRenderer):
         super().__init__(CvEntry, PersonalInfo, BeginDocument, PageBreak)
         self.packages['babel'] = '[english]'
         self.packages['eurosym'] = []
-        self.packages['geometry'] = '[left=1.2cm, right=1.2cm, top=1.2cm, bottom=1.2cm]'
+        self.packages['geometry'] = '[left=1.3cm, right=1.3cm, top=1.3cm, bottom=1.3cm]'
         self.packages['lmodern'] = []
+        self.intro = False
     
     def render_document(self, token):
         template = ('\\documentclass[10pt,a4paper,sans]{{moderncv}}\n'
@@ -22,7 +23,7 @@ class ModernCVRenderer(LaTeXRenderer):
                     '\\renewcommand{{\\listitemsymbol}}{{-~}}\n'
                     '\\nopagenumbers{{}}\n'
                     '{packages}'
-                    '\\setlength{{\\hintscolumnwidth}}{{1.8cm}}\n\n'
+                    '\\setlength{{\\hintscolumnwidth}}{{3cm}}\n\n'
                     '{inner}'
                     '\\end{{document}}\n')
         self.footnotes.update(token.footnotes)
@@ -31,17 +32,20 @@ class ModernCVRenderer(LaTeXRenderer):
 
     def render_heading(self, token):
         inner = self.render_inner(token)
+        self.intro = False
         if token.level == 1:
-            template = ('\\name{{{}}}{{{}}}\n'
-                    '\\title{{{}}}')
             split_title = inner.split('-')
             name = split_title[0].strip().split(' ')
-            return template.format(*name, " - ".join([x.strip() for x  in split_title[1:]]))
+            title = split_title[1].strip()
+            template = ('\\name{{{}}}{{{}}}\n'
+                    '\\title{{{}}}') if len(split_title) <= 2 else ('\\name{{{}}}{{{}}}\n'
+                    '\\title{{{}\\texorpdfstring{{\\newline\\normalsize{{{}}}}}{{}}}}')
+            return template.format(*name, title, " - ".join([x.strip() for x in split_title[2:]]))
         elif token.level == 2:
-            return '\n\\section{{{}}}\n'.format(inner)
+            return '\n\\section{{{}}}\n\\vspace{{-1mm}}\n'.format(inner)
         elif token.level == 3:
-            return '\n\\subsection{{{}}}\n'.format(inner)
-        return '\n\\subsubsection{{{}}}\n'.format(inner)
+            return '\n\\subsection{{{}}}\n\\vspace{{-1mm}}\n'.format(inner)
+        return '\n\\subsubsection{{{}}}\n\\vspace{{-1mm}}\n'.format(inner)
 
     def render_personal_info(self, token):
         template = '\{inner}{{{target}}}'
@@ -56,10 +60,20 @@ class ModernCVRenderer(LaTeXRenderer):
     def render_begin_document(self, token):
         template = ('\\begin{document}\n'
                     '\\makecvtitle\n'
-                    '\\vspace*{-10mm}\n'
+                    '\\vspace*{-12mm}\n'
                     '\\setlength{\parskip}{-0em}')
+        self.intro = True
         return template
+    
+    def render_paragraph(self, token):
+        if self.intro:
+            return '\n\\begin{{center}}\n{}\n\\end{{center}}\n'.format(self.render_inner(token))
+        return super().render_paragraph(token)
 
+    @staticmethod
+    def render_thematic_break(token):
+        return '\\hrulefill\n\\vspace{-2mm}\n'
+    
     def render_page_break(self, token):
         return '\\clearpage\n'
 
@@ -69,6 +83,18 @@ class ModernCVRenderer(LaTeXRenderer):
     def render_list_item(self, token):
         inner = self.render_inner(token).replace('\n', '')
         return '\\cvlistitem{{{}}}\n'.format(inner)
+    
+    def render_raw_text(self, token, escape=True):
+        return (token.content.replace('$', '\\$').replace('{', '\\{')
+                             .replace('}', '\\}').replace('&', '\\&')
+                             .replace('_', '\\_').replace('%', '\\%')
+                             .replace('#', '\\texttt{\\#}')
+                             .replace('++', '\\texttt{++}')
+               ) if escape else token.content
+    
+    @staticmethod
+    def render_math(token):
+        return token.content.replace('\LaTeX', '\\mbox{\\LaTeX}')
 
     def convert_pipe_to_bracket(string):
         return string.replace('|', '}{')
